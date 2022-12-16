@@ -5,6 +5,7 @@ from datetime import datetime
 import cv2
 import random
 import pyttsx3
+import data_reader
 
 # Important Variables
 camera_id = 0
