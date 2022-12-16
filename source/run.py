@@ -6,83 +6,57 @@ import cv2
 import random
 import pyttsx3
 
-
-engine = pyttsx3.init()
-# Use a service account.
-cred = credentials.Certificate(r"credentials/firebase-auth-file.json")
-
-# time setting 
-now = datetime.now()
-timeN = str(datetime.now())
-timeNN = timeN.split(" ")[0]
-
+# Important Variables
 camera_id = 0
-delay = 1
-window_name = 'qRec'
-voices = engine.getProperty('voices')
-engine.setProperty('voice', voices[1].id)
-
 qcd = cv2.QRCodeDetector()
 cap = cv2.VideoCapture(camera_id)
-app = firebase_admin.initialize_app(cred)
 
-db = firestore.client()
+# Create voice object
+def initalize_pyttsx3():
+    engine = pyttsx3.init()
+    voices = engine.getProperty('voices')
+    engine.setProperty('voice', voices[1].id)
 
-current_time = now.strftime("%H:%M:%S")
-time = now.strftime("%H")
+# Connect with FireStore
+def connect_with_firestore():
+    credentials_firestore = credentials.Certificate(r"credentials/firebase-auth-file.json")
+    credentials_firestore_app = firebase_admin.initialize_app(credentials_firestore)
+    firestore_database = firestore.client()    
 
-while True:
-    ret, frame = cap.read()
+# Convert text to speech function.
+def talk_function(text_data):
+    engine.say(text_data)
+    engine.runAndWait()
 
-    if ret:
-        ret_qr, decoded_info, points, _ = qcd.detectAndDecodeMulti(frame)
-        if ret_qr:
-            for s, p in zip(decoded_info, points):
-                if s:
-                    print(s)
-                    color = (0, 255, 0)
-                    
-                    # Retrieve data 
+# Current time return function
+def get_current_time_data():
+    current_date_and_time = datetime.now()
+    current_time = current_date_and_time.strftime("%H:%M:%S")
+    current_date = current_date_and_time.strftime("%Y-%m-%d")
+    current_hour = current_date_and_time.strftime("%H")
 
-                    staff_ref = db.collection(u'staffs')
-                    staff_query = staff_ref.where(u'staff', u'==', str(s)).get()
-                   
-                    if (staff_query == [] ):
-                        engine.say("Hello! This QR code is not valid")
-                        engine.runAndWait()
-                    else:
-
-                        name = staff_query[0].to_dict()['fname']
-                        id = staff_query[0].to_dict()['staff']
-                        department = staff_query[0].to_dict()['department']
-                        print(name) 
-                        if (int(time) < 13):
-                            engine.say("Hello!" + str(name) + "Good Morning!!")
-                            engine.runAndWait()
-                        elif (int(time)> 13):
-                            engine.say("Hello!" + str(name) + "Why did you late today?")
-                            engine.runAndWait()
-                        # Input attendance 
-                       
-                        doc_ref = db.collection(u'attendance').document(timeNN + " "+ str(name))
-                        doc_ref.set({
-                            u'name':str(name),
-                            u'present':True,
-                            u'time': current_time,
-                            u'StaffID': id,
-                            u'department':department,
-                            u'Date':timeNN
-                        })              
-                        
-
-                else:
-                    color = (0, 0, 255)
-                frame = cv2.polylines(frame, [p.astype(int)], True, color, 8)
-        cv2.imshow(window_name, frame)     
-     
-    if cv2.waitKey(delay) & 0xFF == ord('q'):
-        break
-
-cv2.destroyWindow(window_name)
+    return {"current_time":current_date, "current_date":current_date, "current_hour":current_hour}
 
 
+def scanner_function():
+
+    while True:
+         ret, frame = cap.read()
+         
+         
+         cv2.imshow('Input', frame)
+         c = cv2.waitKey(1)
+         
+         if c == 27:
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+
+
+
+if __name__=='__main__':
+    initalize_pyttsx3()
+    connect_with_firestore()
+    scanner_function()
