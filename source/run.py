@@ -9,7 +9,7 @@ import pyttsx3
 
 engine = pyttsx3.init()
 # Use a service account.
-cred = credentials.Certificate(r'C:\Users\User\Desktop\qrec\0-qr-scanner\2-final-project\acc.json')
+cred = credentials.Certificate(r"credentials/firebase-auth-file.json")
 
 # time setting 
 now = datetime.now()
