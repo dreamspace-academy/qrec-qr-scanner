@@ -3,11 +3,16 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 from datetime import datetime
 import cv2
-import data_reader
 import pyttsx3
 from data_reader import open_sheet
 
-
+# Important Variables
+camera_id = 0
+qcd = cv2.QRCodeDetector()
+cap = cv2.VideoCapture(camera_id)
+delay = 1
+window_name = 'qRec'
+limit_time = 11
 # Create voice object
 def initialize_pyttsx3():
     engine = pyttsx3.init()
@@ -20,7 +25,7 @@ def initialize_pyttsx3():
 # Connect with FireStore
 def connect_with_firestore():
     credentials_firestore = credentials.Certificate(r"credentials/firebase-auth-file.json")
-    credentials_firestore_app = firebase_admin.initialize_app(credentials_firestore)
+    firebase_admin.initialize_app(credentials_firestore)
     firestore_database = firestore.client()    
     return firestore_database
 
@@ -44,22 +49,12 @@ def get_date_month_year_only():
     return [ year_only,month_only, date_only]
 
 
-# Important Variables
-camera_id = 0
-qcd = cv2.QRCodeDetector()
+# Variable
 engine_say = initialize_pyttsx3()
-cap = cv2.VideoCapture(camera_id)
 
 
 # Define Scanner Function
-def scanner_function(database):
-
-    camera_id = 0
-    delay = 1
-    window_name = 'qRec'
-
-    qcd = cv2.QRCodeDetector()
-    cap = cv2.VideoCapture(camera_id)
+def scanner_function(database): 
 
     while True:
         ret, frame = cap.read()
@@ -88,13 +83,13 @@ def scanner_function(database):
                                 id = staff_query[0].to_dict()['staff']
                                 department = staff_query[0].to_dict()['department']
                                 print(name) 
-                                if (int(hour_now) < 11):
+                                if (int(hour_now) < limit_time):
                                     engine_say.say("Hey!"+ str(name))
-                                    open_sheet()
+                                    open_sheet(limit_time)
 
-                                elif (int(hour_now)>= 11):
+                                elif (int(hour_now)>= limit_time):
                                     engine_say.say("Hey!"+ str(name))
-                                    open_sheet()
+                                    open_sheet(limit_time)
                                     
                                 # Input attendance 
                                 year_only, month_only, date_only = get_date_month_year_only()
