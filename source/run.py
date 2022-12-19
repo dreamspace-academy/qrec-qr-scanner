@@ -92,7 +92,7 @@ def scanner_function(database):
                                     engine_say.say("Hey!"+ str(name))
                                     open_sheet()
 
-                                elif (int(hour_now)> 11):
+                                elif (int(hour_now)>= 11):
                                     engine_say.say("Hey!"+ str(name))
                                     open_sheet()
                                     
