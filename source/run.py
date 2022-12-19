@@ -13,6 +13,13 @@ cap = cv2.VideoCapture(camera_id)
 delay = 1
 window_name = 'qRec'
 limit_time = 11
+
+# Messages 
+invalid_msg = "This QR code is not valid"
+already_exists_msg = "This QR code exists already!"
+
+# Configuration path
+config_path = r"credentials/firebase-auth-file.json"
 # Create voice object
 def initialize_pyttsx3():
     engine = pyttsx3.init()
@@ -24,7 +31,7 @@ def initialize_pyttsx3():
 
 # Connect with FireStore
 def connect_with_firestore():
-    credentials_firestore = credentials.Certificate(r"credentials/firebase-auth-file.json")
+    credentials_firestore = credentials.Certificate(config_path)
     firebase_admin.initialize_app(credentials_firestore)
     firestore_database = firestore.client()    
     return firestore_database
@@ -66,13 +73,14 @@ def scanner_function(database):
                     if s:
                         print(s)
                         color = (0, 255, 0)
+
                         # Retrieve data 
                         time_now, date_now, hour_now = get_current_time_data()
                         
                         staff_ref = database.collection(u'staffs')
                         staff_query = staff_ref.where(u'staff', u'==', str(s)).get()
                         if (staff_query == [] ):
-                            engine_say.say ("This QR code is not valid")
+                            engine_say.say (invalid_msg)
                             engine_say.runAndWait()
 
                         else:
@@ -107,8 +115,8 @@ def scanner_function(database):
                                     u'Date_only':date_only
                                     })
                             else:
-                                print("This QR code exists already!")
-                                engine_say.say("This QR code exists already!")
+                                print(already_exists_msg)
+                                engine_say.say(already_exists_msg)
                                 engine_say.runAndWait()
                     else:
                         color = (0, 0, 255)
