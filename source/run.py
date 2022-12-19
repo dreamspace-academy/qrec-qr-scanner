@@ -3,9 +3,9 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 from datetime import datetime
 import cv2
-import random
-import pyttsx3
 import data_reader
+import pyttsx3
+
 
 
 # Important Variables
@@ -17,9 +17,16 @@ cap = cv2.VideoCapture(camera_id)
 def initialize_pyttsx3():
     engine = pyttsx3.init()
     voices = engine.getProperty('voices')
-    engine.setProperty('voice', voices[1].id)
-    engine.say()
-    engine.runAndWait()
+    engine.setProperty('voice', voices[0].id)
+   
+    return engine
+
+# Initialize Voice
+def initialize_voice():
+    engine = data_reader.open_sheet()
+
+    return 
+
 
 # Connect with FireStore
 def connect_with_firestore():
@@ -37,7 +44,16 @@ def get_current_time_data():
     current_hour = current_date_and_time.strftime("%H")
 
     return [current_time, current_date, current_hour]
-
+# Current time return function
+def get_date_month_year_only():
+    current_date_and_time = datetime.now()
+    current_time = current_date_and_time.strftime("%H:%M:%S")
+    year_only = current_date_and_time.strftime("%Y")
+    month_only = current_date_and_time.strftime("%m")
+    date_only = current_date_and_time.strftime("%d")
+   
+    
+    return [ year_only,month_only, date_only]
 
 def scanner_function(database):
 
@@ -60,11 +76,12 @@ def scanner_function(database):
                         color = (0, 255, 0)
                         # Retrieve data 
                         time_now, date_now, hour_now = get_current_time_data()
-                         
+                        engine_say = initialize_pyttsx3()
                         staff_ref = database.collection(u'staffs')
                         staff_query = staff_ref.where(u'staff', u'==', str(s)).get()
                         if (staff_query == [] ):
-                            print("wrong")
+                            engine_say.say ("This QR code is not valid")
+                            engine_say.runAndWait()
                             # initalize_pyttsx3()
                         else:
                             attendance_ref = database.collection(u'attendance')
@@ -75,11 +92,12 @@ def scanner_function(database):
                                 department = staff_query[0].to_dict()['department']
                                 print(name) 
                                 # if (int(hour_now) < 13):
-                                #     initialize_pyttsx3()
+                                #     # initialize_pyttsx3()
                                 # elif (int(hour_now)> 13):
-                                #     initialize_pyttsx3()
+                                #     # initialize_pyttsx3()
+                                    
                                 # Input attendance 
-                            
+                                year_only, month_only, date_only = get_date_month_year_only()
                                 doc_ref = database.collection(u'attendance').document(date_now + " "+ str(name))
                                 doc_ref.set({
                                     u'name':str(name),
@@ -87,7 +105,10 @@ def scanner_function(database):
                                     u'time': time_now,
                                     u'StaffID': id,
                                     u'department':department,
-                                    u'Date':date_now
+                                    u'Date':date_now,
+                                    u'Year':int(year_only),
+                                    u'Month': int(month_only),
+                                    u'Date_only':int(date_only)
                                     })
                             else:
                                 print("This QR code exists already!")
@@ -107,3 +128,4 @@ if __name__=='__main__':
     # initalize_pyttsx3()
     database = connect_with_firestore()
     scanner_function(database)
+    initialize_voice()
