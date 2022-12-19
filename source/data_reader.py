@@ -19,12 +19,13 @@ def get_current_time_data():
 
     return current_hour
     
-# Variables 
-hour_now = get_current_time_data()
-engine = initialize_pyttsx3()
+
 
 def open_sheet():
-    if int(hour_now) < 12:
+    # Variables 
+    hour_now = get_current_time_data()
+    engine = initialize_pyttsx3()
+    if int(hour_now) < 11:
         with open('data\welcome-greetings-data.txt', 'r') as file:
             lines = file.readlines()
             line = random.choice(lines)
@@ -34,13 +35,13 @@ def open_sheet():
                     engine.runAndWait()
                     line = file.readline()
 
-    elif int(hour_now) > 12:  
+    elif int(hour_now) > 11:  
         with open('data\latecomers-greetings-data.txt', 'r') as file:
-            line = file.readlines()
+            lines = file.readlines()
+            line = random.choice(lines)
             while line:
                 print(line)
                 engine.say(line)
                 engine.runAndWait()
                 line = file.readline()
-
-open_sheet()
+                
