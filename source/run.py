@@ -7,6 +7,9 @@ import random
 import pyttsx3
 import data_reader
 
+
+
+
 # Important Variables
 camera_id = 0
 qcd = cv2.QRCodeDetector()
@@ -80,15 +83,15 @@ def scanner_function(database):
                             #     initialize_pyttsx3()
                             # Input attendance 
                         
-                            # doc_ref = database.collection(u'attendance').document(date_now + " "+ str(name))
-                            # doc_ref.set({
-                            #     u'name':str(name),
-                            #     u'present':True,
-                            #     u'time': time_now,
-                            #     u'StaffID': id,
-                            #     u'department':department,
-                            #     u'Date':date_now
-                            #     })
+                            doc_ref = database.collection(u'attendance').document(date_now + " "+ str(name))
+                            doc_ref.set({
+                                u'name':str(name),
+                                u'present':True,
+                                u'time': time_now,
+                                u'StaffID': id,
+                                u'department':department,
+                                u'Date':date_now
+                                })
                     else:
                         color = (0, 0, 255)
                     frame = cv2.polylines(frame, [p.astype(int)], True, color, 8)
