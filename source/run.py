@@ -8,8 +8,6 @@ import pyttsx3
 import data_reader
 
 
-
-
 # Important Variables
 camera_id = 0
 qcd = cv2.QRCodeDetector()
@@ -38,14 +36,10 @@ def get_current_time_data():
     current_date = current_date_and_time.strftime("%Y-%m-%d")
     current_hour = current_date_and_time.strftime("%H")
 
-    return {current_time, current_date, current_hour}
-
-    
+    return [current_time, current_date, current_hour]
 
 
 def scanner_function(database):
-
-    import cv2
 
     camera_id = 0
     delay = 1
@@ -66,32 +60,37 @@ def scanner_function(database):
                         color = (0, 255, 0)
                         # Retrieve data 
                         time_now, date_now, hour_now = get_current_time_data()
+                         
                         staff_ref = database.collection(u'staffs')
                         staff_query = staff_ref.where(u'staff', u'==', str(s)).get()
                         if (staff_query == [] ):
                             print("wrong")
                             # initalize_pyttsx3()
                         else:
-
-                            name = staff_query[0].to_dict()['fname']
-                            id = staff_query[0].to_dict()['staff']
-                            department = staff_query[0].to_dict()['department']
-                            print(name) 
-                            # if (int(hour_now) < 13):
-                            #     initialize_pyttsx3()
-                            # elif (int(hour_now)> 13):
-                            #     initialize_pyttsx3()
-                            # Input attendance 
-                        
-                            doc_ref = database.collection(u'attendance').document(date_now + " "+ str(name))
-                            doc_ref.set({
-                                u'name':str(name),
-                                u'present':True,
-                                u'time': time_now,
-                                u'StaffID': id,
-                                u'department':department,
-                                u'Date':date_now
-                                })
+                            attendance_ref = database.collection(u'attendance')
+                            attendance_query = attendance_ref.where(u'StaffID', u'==', str(s)).get()
+                            if (attendance_query == [] ):
+                                name = staff_query[0].to_dict()['fname']
+                                id = staff_query[0].to_dict()['staff']
+                                department = staff_query[0].to_dict()['department']
+                                print(name) 
+                                # if (int(hour_now) < 13):
+                                #     initialize_pyttsx3()
+                                # elif (int(hour_now)> 13):
+                                #     initialize_pyttsx3()
+                                # Input attendance 
+                            
+                                doc_ref = database.collection(u'attendance').document(date_now + " "+ str(name))
+                                doc_ref.set({
+                                    u'name':str(name),
+                                    u'present':True,
+                                    u'time': time_now,
+                                    u'StaffID': id,
+                                    u'department':department,
+                                    u'Date':date_now
+                                    })
+                            else:
+                                print("This QR code exists already!")
                     else:
                         color = (0, 0, 255)
                     frame = cv2.polylines(frame, [p.astype(int)], True, color, 8)
