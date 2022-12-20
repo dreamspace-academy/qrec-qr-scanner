@@ -14,6 +14,7 @@ cap = cv2.VideoCapture(camera_id)
 delay = 1
 window_name = 'qRec'
 limit_time = 11
+qr_counter = 0
 
 # Messages 
 invalid_msg = "This QR code is not valid"
@@ -64,63 +65,71 @@ engine_say = initialize_pyttsx3()
 
 
 # Define Scanner Function
-def scanner_function(database): 
+def scanner_function(database):
+    global qr_counter
 
     while True:
         ret, frame = cap.read()
-
         if ret:
             ret_qr, decoded_info, points, _ = qcd.detectAndDecodeMulti(frame)
             if ret_qr:
-                for QrValue, p in zip(decoded_info, points):
+                for QrValue, point in zip(decoded_info, points):
                     if QrValue:
-                        print(QrValue)
-                        color = (0, 255, 0)
 
-                        # Retrieve data 
-                        time_now, date_now, hour_now = get_current_time_data()
-                        
-                        staff_ref = database.collection(u'staffs')
-                        staff_query = staff_ref.where(u'staff', u'==', str(QrValue)).get()
-                        if (staff_query == [] ):
-                            engine_say.say (invalid_msg)
-                            engine_say.runAndWait()
+                        if qr_counter == 5:
 
-                        else:
-                            attendance_ref = database.collection(u'attendance')
-                            attendance_query = attendance_ref.where(u'StaffID', u'==', str(QrValue)).get()
-                            if (attendance_query == [] ):
-                                name = staff_query[0].to_dict()['fname']
-                                id = staff_query[0].to_dict()['staff']
-                                department = staff_query[0].to_dict()['department']
-                                print(name) 
-                                if (int(hour_now) < limit_time):
-                                    engine_say.say("Hey!"+ str(name))
-                                    open_sheet(limit_time)
-
-                                elif (int(hour_now)>= limit_time):
-                                    engine_say.say("Hey!"+ str(name))
-                                    open_sheet(limit_time)
-                                    
-                                # Input attendance 
-                                year_only, month_only, date_only = get_date_month_year_only()
-
-                                doc_ref = database.collection(u'attendance').document(date_now + " "+ str(name))
-                                doc_ref.set({
-                                    u'name':str(name),
-                                    u'present':True,
-                                    u'time': time_now,
-                                    u'StaffID': id,
-                                    u'department':department,
-                                    u'Date':date_now,
-                                    u'Year':year_only,
-                                    u'Month': month_only,
-                                    u'Date_only':date_only
-                                    })
-                            else:
-                                print(already_exists_msg)
-                                engine_say.say(already_exists_msg)
+                            #print(f'QR Data: {QrValue}')
+                            
+                            # Retrieve data for time 
+                            time_now, date_now, hour_now = get_current_time_data()
+                            
+                            staff_ref = database.collection(u'staffs')
+                            staff_query = staff_ref.where(u'staff', u'==', str(QrValue)).get()
+                            
+                            if (staff_query == [] ):
+                                engine_say.say (invalid_msg)
                                 engine_say.runAndWait()
+
+                            else:
+                                attendance_ref = database.collection(u'attendance')
+                                attendance_query = attendance_ref.where(u'StaffID', u'==', str(QrValue)).get()
+                                if (attendance_query == [] ):
+                                    name = staff_query[0].to_dict()['fname']
+                                    id = staff_query[0].to_dict()['staff']
+                                    department = staff_query[0].to_dict()['department']
+                                    print(name) 
+                                    if (int(hour_now) < limit_time):
+                                        engine_say.say("Hey!"+ str(name))
+                                        open_sheet(limit_time)
+
+                                    elif (int(hour_now)>= limit_time):
+                                        engine_say.say("Hey!"+ str(name))
+                                        open_sheet(limit_time)
+                                        
+                                    # Input attendance 
+                                    year_only, month_only, date_only = get_date_month_year_only()
+
+                                    doc_ref = database.collection(u'attendance').document(date_now + " "+ str(name))
+                                    doc_ref.set({
+                                        u'name':str(name),
+                                        u'present':True,
+                                        u'time': time_now,
+                                        u'StaffID': id,
+                                        u'department':department,
+                                        u'Date':date_now,
+                                        u'Year':year_only,
+                                        u'Month': month_only,
+                                        u'Date_only':date_only
+                                        })
+                                else:
+                                    print(already_exists_msg)
+                                    engine_say.say(already_exists_msg)
+                                    engine_say.runAndWait()
+
+                                qr_counter = 0
+
+                        qr_counter = qr_counter + 1 
+                    frame = cv2.polylines(frame, [point.astype(int)], True, (255, 0, 0), 4)
             cv2.imshow(window_name, frame)
 
         if cv2.waitKey(delay) & 0xFF == ord('q'):
