@@ -1,11 +1,11 @@
 import cv2
+import random
 import pyttsx3
 import firebase_admin
 from datetime import datetime
-from data_reader import open_sheet
 from firebase_admin import firestore
 from firebase_admin import credentials
-
+from data_reader import welcome_greeting_arr, latecomers_greeting_arr
 
 # Important Variables
 camera_id = 0
@@ -63,6 +63,12 @@ def get_date_month_year_only():
 # Variable for pyttsx3
 engine_say = initialize_pyttsx3()
 
+def talk_function(words):
+    print(f"Computer: {words}")
+    engine_say.say (words)
+    engine_say.runAndWait()
+
+
 
 # Define Scanner Function
 def scanner_function(database):
@@ -86,26 +92,25 @@ def scanner_function(database):
                             staff_ref = database.collection(u'staffs')
                             staff_query = staff_ref.where(u'staff', u'==', str(QrValue)).get()
                             
-                            if (staff_query == [] ):
-                                engine_say.say (invalid_msg)
-                                engine_say.runAndWait()
+                            if (staff_query == [] ): # If it is a invalid QR
+                                talk_function(invalid_msg)
 
-                            else:
+                            else: # Write the present status
                                 attendance_ref = database.collection(u'attendance')
                                 attendance_query = attendance_ref.where(u'StaffID', u'==', str(QrValue)).get()
                                 if (attendance_query == [] ):
+                                    
                                     name = staff_query[0].to_dict()['fname']
                                     id = staff_query[0].to_dict()['staff']
                                     department = staff_query[0].to_dict()['department']
-                                    print(name) 
+                                    
                                     if (int(hour_now) < limit_time):
-                                        engine_say.say("Hey!"+ str(name))
-                                        open_sheet(limit_time)
+                                        talk_function(f"Dear {str(name)}, {random.choice(welcome_greeting_arr)}")
+                                        
 
                                     elif (int(hour_now)>= limit_time):
-                                        engine_say.say("Hey!"+ str(name))
-                                        open_sheet(limit_time)
-                                        
+                                        talk_function(f"Dear {str(name)}, {random.choice(latecomers_greeting_arr)}")
+
                                     # Input attendance 
                                     year_only, month_only, date_only = get_date_month_year_only()
 
@@ -116,20 +121,18 @@ def scanner_function(database):
                                         u'time': time_now,
                                         u'StaffID': id,
                                         u'department':department,
-                                        u'Date':date_now,
+                                        u'date':date_now,
                                         u'Year':year_only,
                                         u'Month': month_only,
-                                        u'Date_only':date_only
+                                        u'date_only':date_only
                                         })
-                                else:
-                                    print(already_exists_msg)
-                                    engine_say.say(already_exists_msg)
-                                    engine_say.runAndWait()
+                                else: # If the QR code already exist
+                                    talk_function(already_exists_msg)
 
-                                qr_counter = 0
+                            qr_counter = 0
 
                         qr_counter = qr_counter + 1 
-                    frame = cv2.polylines(frame, [point.astype(int)], True, (255, 0, 0), 4)
+                    frame = cv2.polylines(frame, [point.astype(int)], True, (255, 0, 0), 5)
             cv2.imshow(window_name, frame)
 
         if cv2.waitKey(delay) & 0xFF == ord('q'):
