@@ -1,10 +1,11 @@
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
-from datetime import datetime
 import cv2
 import pyttsx3
+import firebase_admin
+from datetime import datetime
 from data_reader import open_sheet
+from firebase_admin import firestore
+from firebase_admin import credentials
+
 
 # Important Variables
 camera_id = 0
@@ -20,6 +21,7 @@ already_exists_msg = "This QR code exists already!"
 
 # Configuration path
 config_path = r"credentials/firebase-auth-file.json"
+
 # Create voice object
 def initialize_pyttsx3():
     engine = pyttsx3.init()
@@ -45,6 +47,7 @@ def get_current_time_data():
     current_hour = current_date_and_time.strftime("%H")
 
     return [current_time, current_date, current_hour]
+
 # Current time return function
 def get_date_month_year_only():
     current_date_and_time = datetime.now()
@@ -53,10 +56,10 @@ def get_date_month_year_only():
     date_only = current_date_and_time.strftime("%d")
    
     
-    return [ year_only,month_only, date_only]
+    return [year_only,month_only, date_only]
 
 
-# Variable
+# Variable for pyttsx3
 engine_say = initialize_pyttsx3()
 
 
@@ -69,23 +72,23 @@ def scanner_function(database):
         if ret:
             ret_qr, decoded_info, points, _ = qcd.detectAndDecodeMulti(frame)
             if ret_qr:
-                for s, p in zip(decoded_info, points):
-                    if s:
-                        print(s)
+                for QrValue, p in zip(decoded_info, points):
+                    if QrValue:
+                        print(QrValue)
                         color = (0, 255, 0)
 
                         # Retrieve data 
                         time_now, date_now, hour_now = get_current_time_data()
                         
                         staff_ref = database.collection(u'staffs')
-                        staff_query = staff_ref.where(u'staff', u'==', str(s)).get()
+                        staff_query = staff_ref.where(u'staff', u'==', str(QrValue)).get()
                         if (staff_query == [] ):
                             engine_say.say (invalid_msg)
                             engine_say.runAndWait()
 
                         else:
                             attendance_ref = database.collection(u'attendance')
-                            attendance_query = attendance_ref.where(u'StaffID', u'==', str(s)).get()
+                            attendance_query = attendance_ref.where(u'StaffID', u'==', str(QrValue)).get()
                             if (attendance_query == [] ):
                                 name = staff_query[0].to_dict()['fname']
                                 id = staff_query[0].to_dict()['staff']
@@ -118,9 +121,6 @@ def scanner_function(database):
                                 print(already_exists_msg)
                                 engine_say.say(already_exists_msg)
                                 engine_say.runAndWait()
-                    else:
-                        color = (0, 0, 255)
-                    frame = cv2.polylines(frame, [p.astype(int)], True, color, 8)
             cv2.imshow(window_name, frame)
 
         if cv2.waitKey(delay) & 0xFF == ord('q'):
