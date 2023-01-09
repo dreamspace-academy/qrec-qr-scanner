@@ -5,7 +5,7 @@ import firebase_admin
 from datetime import datetime
 from firebase_admin import firestore
 from firebase_admin import credentials
-from data_reader import welcome_greeting_arr, latecomers_greeting_arr
+from data_reader import welcome_greeting_arr, latecomers_greeting_arr, invalid_qr_arr
 
 # Important Variables
 camera_id = 0
@@ -17,7 +17,7 @@ limit_time = 11
 qr_counter = 0
 
 # Messages 
-invalid_msg = "This QR code is not valid"
+# invalid_msg = "This QR code is not valid"
 already_exists_msg = "This QR code exists already!"
 
 # Configuration path
@@ -93,7 +93,7 @@ def scanner_function(database):
                             staff_query = staff_ref.where(u'staff', u'==', str(QrValue)).get()
                             
                             if (staff_query == [] ): # If it is a invalid QR
-                                talk_function(invalid_msg)
+                                talk_function(f"{random.choice(invalid_qr_arr)}")
 
                             else: # Write the present status
                                 attendance_ref = database.collection(u'attendance')
