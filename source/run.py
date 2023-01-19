@@ -17,11 +17,10 @@ limit_time = 11
 qr_counter = 0
 
 # Messages 
-# invalid_msg = "This QR code is not valid"
 already_exists_msg = "This QR code exists already!"
 
 # Configuration path
-config_path = r"credentials/firebase-auth-file.json"
+config_path = r"C:/Users/User/Desktop/qrec-qr-scanner/source/credentials/firebase-auth-file.json"
 
 # Create voice object
 def initialize_pyttsx3():
@@ -84,7 +83,7 @@ def scanner_function(database):
 
                         if qr_counter == 5:
 
-                            #print(f'QR Data: {QrValue}')
+                            print(f'QR Data: {QrValue}')
                             
                             # Retrieve data for time 
                             time_now, date_now, hour_now = get_current_time_data()
@@ -94,6 +93,7 @@ def scanner_function(database):
                             
                             if (staff_query == [] ): # If it is a invalid QR
                                 talk_function(f"{random.choice(invalid_qr_arr)}")
+                                
 
                             else: # Write the present status
                                 attendance_ref = database.collection(u'attendance')
@@ -128,6 +128,7 @@ def scanner_function(database):
                                         })
                                 else: # If the QR code already exist
                                     talk_function(already_exists_msg)
+                                    
 
                             qr_counter = 0
 
