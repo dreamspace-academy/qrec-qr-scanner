@@ -20,7 +20,7 @@ qr_counter = 0
 already_exists_msg = "This QR code exists already!"
 
 # Configuration path
-config_path = r"C:/Users/User/Desktop/qrec-qr-scanner/source/credentials/firebase-auth-file.json"
+config_path = r"credentials/firebase-auth-file.json"
 
 # Create voice object
 def initialize_pyttsx3():
