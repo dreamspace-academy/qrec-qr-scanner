@@ -125,7 +125,7 @@ def scanner_function(database):
                                         u'Year':year_only,
                                         u'Month': month_only,
                                         u'date_only':date_only,
-                                        u'date':date_now + ' ' + time_now,
+                                        u'date + time':date_now + ' ' + time_now,
                                         })
                                 else: # If the QR code already exist
                                     talk_function(already_exists_msg)
