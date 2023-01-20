@@ -20,7 +20,7 @@ qr_counter = 0
 already_exists_msg = "This QR code exists already!"
 
 # Configuration path
-config_path = r"credentials/firebase-auth-file.json"
+config_path = r"source/credentials/firebase-auth-file.json"
 
 # Create voice object
 def initialize_pyttsx3():
@@ -124,7 +124,8 @@ def scanner_function(database):
                                         u'date':date_now,
                                         u'Year':year_only,
                                         u'Month': month_only,
-                                        u'date_only':date_only
+                                        u'date_only':date_only,
+                                        u'date':date_now + ' ' + time_now,
                                         })
                                 else: # If the QR code already exist
                                     talk_function(already_exists_msg)
@@ -142,7 +143,6 @@ def scanner_function(database):
     cv2.destroyWindow(window_name)
 
 if __name__=='__main__':
-    
     database = connect_with_firestore()
     scanner_function(database)
     
