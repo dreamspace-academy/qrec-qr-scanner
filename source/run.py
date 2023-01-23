@@ -20,7 +20,7 @@ qr_counter = 0
 already_exists_msg = "This QR code exists already!"
 
 # Configuration path
-config_path = r"source/credentials/firebase-auth-file.json"
+config_path = r"credentials/firebase-auth-file.json"
 
 # Create voice object
 def initialize_pyttsx3():
@@ -97,7 +97,7 @@ def scanner_function(database):
 
                             else: # Write the present status
                                 attendance_ref = database.collection(u'attendance')
-                                attendance_query = attendance_ref.where(u'StaffID', u'==', str(QrValue)).get()
+                                attendance_query = attendance_ref.where(u'StaffID', u'==', str(QrValue)).where(u'date', u'==', str(date_now)).get()
                                 if (attendance_query == [] ):
                                     
                                     name = staff_query[0].to_dict()['fname']
@@ -121,7 +121,7 @@ def scanner_function(database):
                                         u'time': time_now,
                                         u'StaffID': id,
                                         u'department':department,
-                                        u'date':date_now,
+                                        u'date': date_now,
                                         u'Year':year_only,
                                         u'Month': month_only,
                                         u'date_only':date_only,
