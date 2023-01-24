@@ -94,38 +94,40 @@ def scanner_function(database):
                                 
                             else: # Write the present status
                                 attendance_ref = database.collection(u'attendance')
-                                attendance_query_date = attendance_ref.where(u'date', u'==', str(date_now)).where(u'StaffID', u'==', str(QrValue)).get()
-                                if (attendance_query_date == [] ):
-                                    attendance_query = attendance_ref.where(u'StaffID', u'==', str(QrValue)).where(u'date', u'==', str(date_now)).get()
-                                    if (attendance_query == []):
-                                        name = staff_query[0].to_dict()['fname']
-                                        id = staff_query[0].to_dict()['staff']
-                                        department = staff_query[0].to_dict()['department']
+                                attendance_query = attendance_ref.where(u'date', u'==', str(date_now)).where(u'StaffID', u'==', str(QrValue)).get()
+                                if (attendance_query == [] ):
+                                
+                                    name = staff_query[0].to_dict()['fname']
+                                    id = staff_query[0].to_dict()['staff']
+                                    department = staff_query[0].to_dict()['department']
+                                    
+                                    if (int(hour_now) < limit_time):
+                                        talk_function(f"Dear {str(name)}, {random.choice(welcome_greeting_arr)}")
                                         
-                                        if (int(hour_now) < limit_time):
-                                            talk_function(f"Dear {str(name)}, {random.choice(welcome_greeting_arr)}")
-                                            
 
-                                        elif (int(hour_now)>= limit_time):
-                                            talk_function(f"Dear {str(name)}, {random.choice(latecomers_greeting_arr)}")
+                                    elif (int(hour_now)>= limit_time):
+                                        talk_function(f"Dear {str(name)}, {random.choice(latecomers_greeting_arr)}")
 
-                                        # Input attendance 
-                                        year_only, month_only, date_only = get_date_month_year_only()
+                                    # Input attendance 
+                                    year_only, month_only, date_only = get_date_month_year_only()
 
-                                        doc_ref = database.collection(u'attendance').document(date_now + " "+ str(name))
-                                        doc_ref.set({
-                                            u'name':str(name),
-                                            u'present':True,
-                                            u'time': time_now,
-                                            u'StaffID': id,
-                                            u'department':department,
-                                            u'Year':year_only,
-                                            u'Month': month_only,
-                                            u'date_only':date_only,
-                                            u'date+time':date_now + ' ' + time_now,
-                                            })
-                                    else: # If the QR code already exist
-                                        talk_function(already_exists_msg)
+                                    doc_ref = database.collection(u'attendance').document(date_now + " "+ str(name))
+                                    doc_ref.set({
+                                        u'name':str(name),
+                                        u'present':True,
+                                        u'time': time_now,
+                                        u'StaffID': id,
+                                        u'department':department,
+                                        u'Year':year_only,
+                                        u'Month': month_only,
+                                        u'date_only':date_only,
+                                        u'date+time':date_now + ' ' + time_now,
+                                        u'date':date_now,
+
+
+                                        })
+                                else: # If the QR code already exist
+                                    talk_function(already_exists_msg)
                                 
                             qr_counter = 0
 
