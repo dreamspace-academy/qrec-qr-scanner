@@ -20,14 +20,14 @@ qr_counter = 0
 already_exists_msg = "This QR code exists already!"
 
 # Configuration path
-config_path = r"credentials/firebase-auth-file.json"
+config_path = r"C:/Users/User/Desktop/qrec-qr-scanner/source/credentials/firebase-auth-file.json"
+
 
 # Create voice object
 def initialize_pyttsx3():
     engine = pyttsx3.init()
     voices = engine.getProperty('voices')
     engine.setProperty('voice', voices[0].id)
-   
     return engine
 
 
@@ -54,19 +54,17 @@ def get_date_month_year_only():
     year_only = current_date_and_time.strftime("%Y")
     month_only = current_date_and_time.strftime("%m")
     date_only = current_date_and_time.strftime("%d")
-   
-    
     return [year_only,month_only, date_only]
 
 
 # Variable for pyttsx3
 engine_say = initialize_pyttsx3()
 
+
 def talk_function(words):
     print(f"Computer: {words}")
     engine_say.say (words)
     engine_say.runAndWait()
-
 
 
 # Define Scanner Function
@@ -94,43 +92,41 @@ def scanner_function(database):
                             if (staff_query == [] ): # If it is a invalid QR
                                 talk_function(f"{random.choice(invalid_qr_arr)}")
                                 
-
                             else: # Write the present status
                                 attendance_ref = database.collection(u'attendance')
-                                attendance_query = attendance_ref.where(u'StaffID', u'==', str(QrValue)).where(u'date', u'==', str(date_now)).get()
-                                if (attendance_query == [] ):
-                                    
-                                    name = staff_query[0].to_dict()['fname']
-                                    id = staff_query[0].to_dict()['staff']
-                                    department = staff_query[0].to_dict()['department']
-                                    
-                                    if (int(hour_now) < limit_time):
-                                        talk_function(f"Dear {str(name)}, {random.choice(welcome_greeting_arr)}")
+                                attendance_query_date = attendance_ref.where(u'date', u'==', str(date_now)).where(u'StaffID', u'==', str(QrValue)).get()
+                                if (attendance_query_date == [] ):
+                                    attendance_query = attendance_ref.where(u'StaffID', u'==', str(QrValue)).where(u'date', u'==', str(date_now)).get()
+                                    if (attendance_query == []):
+                                        name = staff_query[0].to_dict()['fname']
+                                        id = staff_query[0].to_dict()['staff']
+                                        department = staff_query[0].to_dict()['department']
                                         
+                                        if (int(hour_now) < limit_time):
+                                            talk_function(f"Dear {str(name)}, {random.choice(welcome_greeting_arr)}")
+                                            
 
-                                    elif (int(hour_now)>= limit_time):
-                                        talk_function(f"Dear {str(name)}, {random.choice(latecomers_greeting_arr)}")
+                                        elif (int(hour_now)>= limit_time):
+                                            talk_function(f"Dear {str(name)}, {random.choice(latecomers_greeting_arr)}")
 
-                                    # Input attendance 
-                                    year_only, month_only, date_only = get_date_month_year_only()
+                                        # Input attendance 
+                                        year_only, month_only, date_only = get_date_month_year_only()
 
-                                    doc_ref = database.collection(u'attendance').document(date_now + " "+ str(name))
-                                    doc_ref.set({
-                                        u'name':str(name),
-                                        u'present':True,
-                                        u'time': time_now,
-                                        u'StaffID': id,
-                                        u'department':department,
-                                        u'date': date_now,
-                                        u'Year':year_only,
-                                        u'Month': month_only,
-                                        u'date_only':date_only,
-                                        u'date + time':date_now + ' ' + time_now,
-                                        })
-                                else: # If the QR code already exist
-                                    talk_function(already_exists_msg)
-                                    
-
+                                        doc_ref = database.collection(u'attendance').document(date_now + " "+ str(name))
+                                        doc_ref.set({
+                                            u'name':str(name),
+                                            u'present':True,
+                                            u'time': time_now,
+                                            u'StaffID': id,
+                                            u'department':department,
+                                            u'Year':year_only,
+                                            u'Month': month_only,
+                                            u'date_only':date_only,
+                                            u'date+time':date_now + ' ' + time_now,
+                                            })
+                                    else: # If the QR code already exist
+                                        talk_function(already_exists_msg)
+                                
                             qr_counter = 0
 
                         qr_counter = qr_counter + 1 
