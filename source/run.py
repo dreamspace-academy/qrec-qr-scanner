@@ -121,7 +121,7 @@ def scanner_function(database):
                                         u'Year':year_only,
                                         u'Month': month_only,
                                         u'date_only':date_only,
-                                        u'date+time':date_now + ' ' + time_now,
+                                        u'date_time':date_now + ' ' + time_now,
                                         u'date':date_now,
 
 
