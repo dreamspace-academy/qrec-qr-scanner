@@ -11,6 +11,8 @@ from data_reader import welcome_greeting_arr, latecomers_greeting_arr, invalid_q
 camera_id = 0
 qcd = cv2.QRCodeDetector()
 cap = cv2.VideoCapture(camera_id)
+cap.set(3,1208)
+cap.set(4, 720)
 delay = 1
 window_name = 'qRec'
 limit_time = 11
